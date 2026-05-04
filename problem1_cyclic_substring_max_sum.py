@@ -27,112 +27,35 @@ Space Complexity: O(1)  -- at most 26 characters in the frequency map
 
 
 def solve():
-    S = input().strip()
-    n = len(S)
+    s = input().strip()
+    n = len(s)
 
     if n == 0:
         print(0)
         return
 
-    # Double the string to handle cyclic substrings
-    T = S + S
+    t = s + s
+    freq = {}
+    left = 0
+    curr = 0
+    ans = 0
 
-    char_count = {}   # frequency of each character in current window
-    current_sum = 0   # sum of values in current window
-    max_sum = 0       # answer
-    left = 0          # left pointer of the sliding window
+    for right in range(len(t)):
+        ch = t[right]
+        val = ord(ch) - ord('a') + 1
 
-    for right in range(len(T)):
-        ch = T[right]
-        val = ord(ch) - ord('a') + 1  # a=1, b=2, ..., z=26
-
-        # Shrink window if this character is already in the window (duplicate)
-        while char_count.get(ch, 0) > 0:
-            left_ch = T[left]
-            char_count[left_ch] -= 1
-            current_sum -= ord(left_ch) - ord('a') + 1
+        while freq.get(ch, 0) > 0 or (right - left + 1) > n:
+            left_ch = t[left]
+            freq[left_ch] -= 1
+            curr -= ord(left_ch) - ord('a') + 1
             left += 1
 
-        # Shrink window if its size would exceed n (can't use full string twice)
-        while (right - left + 1) > n:
-            left_ch = T[left]
-            char_count[left_ch] -= 1
-            current_sum -= ord(left_ch) - ord('a') + 1
-            left += 1
+        freq[ch] = freq.get(ch, 0) + 1
+        curr += val
+        ans = max(ans, curr)
 
-        # Add current character to the window
-        char_count[ch] = char_count.get(ch, 0) + 1
-        current_sum += val
-
-        # Update maximum sum
-        if current_sum > max_sum:
-            max_sum = current_sum
-
-    print(max_sum)
-
-
-# ---------------------------------------------------------------------------
-# Test Cases
-# ---------------------------------------------------------------------------
-
-def run_tests():
-    test_cases = [
-        # (input_string, expected_output, explanation)
-        ("abca",   6,  "abc/bca/cab all give sum 6; 'abca' has dup 'a'"),
-        ("a",      1,  "single character: a=1"),
-        ("z",     26,  "single character: z=26"),
-        ("abcde", 15,  "all unique, full string: 1+2+3+4+5=15"),
-        ("aaa",    1,  "all same; only window of size 1 is valid, a=1"),
-        ("zy",    51,  "z=26 + y=25 = 51"),
-        ("abcba",  6,  "abc=6, cba=6; wrapping gives dups; max=6"),
-        ("abcabc", 6,  "abc=6 is the longest unique cyclic substring"),
-        ("xyz",   75,  "x=24 + y=25 + z=26 = 75"),
-        ("ba",     3,  "b=2 + a=1 = 3"),
-        ("dcba",  10,  "d=4 + c=3 + b=2 + a=1 = 10"),
-    ]
-
-    print("Running test cases...\n")
-    all_passed = True
-
-    for i, (s, expected, explanation) in enumerate(test_cases):
-        n = len(s)
-        T = s + s
-        char_count = {}
-        current_sum = 0
-        max_sum = 0
-        left = 0
-
-        for right in range(len(T)):
-            ch = T[right]
-            val = ord(ch) - ord('a') + 1
-            while char_count.get(ch, 0) > 0:
-                lc = T[left]
-                char_count[lc] -= 1
-                current_sum -= ord(lc) - ord('a') + 1
-                left += 1
-            while (right - left + 1) > n:
-                lc = T[left]
-                char_count[lc] -= 1
-                current_sum -= ord(lc) - ord('a') + 1
-                left += 1
-            char_count[ch] = char_count.get(ch, 0) + 1
-            current_sum += val
-            if current_sum > max_sum:
-                max_sum = current_sum
-
-        status = "[PASS]" if max_sum == expected else "[FAIL] got={}, expected={}".format(max_sum, expected)
-        if max_sum != expected:
-            all_passed = False
-        print("Test {:2d}: S='{}' | {}".format(i + 1, s, status))
-        print("         {}\n".format(explanation))
-
-    print("=" * 60)
-    print("All tests passed!" if all_passed else "Some tests FAILED!")
+    print(ans)
 
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        run_tests()
-    else:
-        solve()
+    solve()
